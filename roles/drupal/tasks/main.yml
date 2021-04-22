@@ -1,0 +1,37 @@
+---
+- name: clone site repository from own src
+  become: true
+  become_user: deploy
+  git:
+    repo: "ssh://git@myRepo/{{project_namespace}}.git"
+    dest: "/app/{{project_env}}/{{project_namespace}}"
+    key_file: "~/.ssh/id_ed25519"
+    accept_hostkey: yes
+
+- name: install Drupal dependencies
+  become: true
+  become_user: deploy
+  composer:
+    command: install
+    working_dir: "/app/{{project_env}}/{{project_namespace}}"
+
+- name: install Drupal
+  shell: vendor/drush/drush/drush si -y --site-name="{{ drupal_site_name }}" --account-name={{ drupal_admin_name }} --account-pass="{{ drupal_admin_password }}" --db-url=pgsql://{{ postgresql_database_username }}:{{ postgresql_database_password }}@{{ postgresql_database_host }}/{{ postgresql_database_name }}
+  args:
+    chdir: "/app/{{project_env}}/{{project_namespace}}"
+
+- name: Configure Nginx virtual host
+  become: true
+  template:
+    src: vhost.conf.j2
+    dest: /etc/nginx/sites-available/{{ project_domain_name }}.conf
+
+- name: Create a symbolic link
+  become: true
+  file:
+    src: /etc/nginx/sites-available/{{ project_domain_name }}.conf
+    dest: /etc/nginx/sites-enabled/{{ project_domain_name }}.conf
+    state: link
+  notify:
+    - verify nginx config
+    - reload nginx

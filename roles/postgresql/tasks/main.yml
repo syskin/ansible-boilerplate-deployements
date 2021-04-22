@@ -1,0 +1,20 @@
+---
+- name: Add postgresql key.
+  become: true
+  apt_key:
+    url: "{{ postgresql_repo_key }}"
+
+- name: add postgresql repository
+  become: true
+  apt_repository:
+    repo: " {{ postgresql_repo_url }} "
+
+- name: install postgresql-{{ postgresql_version }}
+  become: true
+  apt:
+    name: "postgresql-{{ postgresql_version }}"
+
+- name: Install psycopg2
+  become: yes
+  apt:
+    name: python-psycopg2

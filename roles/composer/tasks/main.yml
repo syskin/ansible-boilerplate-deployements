@@ -1,0 +1,19 @@
+---
+- name: Install unzip
+  become: yes
+  apt:
+    name: unzip
+
+- name: Download composer
+  get_url:
+    url: "{{ composer_installer_url }}"
+    dest: "{{ composer_installer_dest }}"
+
+- name: Install composer
+  become: yes
+  command: "php {{ composer_installer_dest }} --install-dir=/usr/local/bin --filename=composer"
+
+- name: Remove composer installer
+  file:
+    path: "{{ composer_installer_dest }}"
+    state: absent

@@ -1,0 +1,17 @@
+- name: Add a new user
+  become: true
+  user:
+    name: "{{ ssh_user }}"
+    password: "{{ ssh_user_password }}"
+    state: present
+
+- name: Add new user to the sudoers
+  copy:
+    dest: "/etc/sudoers.d/{{ ssh_user }}"
+    content: "{{ ssh_user }}  ALL=(ALL)  NOPASSWD: ALL"
+
+- name: Deploy SSH Key
+  authorized_key: user="{{ ssh_user }}" key="{{ lookup('file', '/home/{{ ssh_user }}/.ssh/id_rsa.pub') }}" state=present
+
+- name: Change root password
+  user: name=root update_password=always password={{ root_password }}

@@ -1,0 +1,5 @@
+---
+- name: Create user {{ short_username }}
+  become: true
+  user:
+    name: "{{ short_username }}"

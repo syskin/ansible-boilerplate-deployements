@@ -1,0 +1,18 @@
+---
+- name: verify nginx config
+  become: true
+  command: nginx -t
+  any_errors_fatal: true
+  changed_when: false
+
+- name: reload nginx
+  become: true
+  service:
+    name: nginx
+    state: reloaded
+
+- name: restart nginx
+  become: true
+  service:
+    name: nginx
+    state: restarted

@@ -1,0 +1,5 @@
+---
+dependencies:
+  - role: nginx
+  - role: postgresql_database
+  - role: php-fpm-create-pool

@@ -1,0 +1,28 @@
+- hosts: vps-setup
+  vars:
+    certbot_auto_renew: false
+    certbot_admin_email: test@test.com
+    certbot_create_if_missing: true
+    certbot_create_standalone_stop_services: [
+      nginx
+    ]
+    nginx_server_tokens: "off"
+    nginx_vhosts:
+      - listen: "443 ssl http2"
+        server_name: "test.com"
+        localhost_port: "3000"
+        root: "/home/{{ ansible_user }}/myApp"
+        filename: "test.com.conf"
+        template: "./templates/www-vhost.conf.j2"
+  roles:
+    - role: geerlingguy.certbot
+      become: true
+      tags: certbot
+      vars:
+        certbot_certs:
+          - email: {{ certbot_admin_email }}
+            domains:
+              - test.com
+    - role: geerlingguy.nginx
+      become: true
+      tags: nginx

@@ -1,0 +1,37 @@
+- name: Install debian packages
+  apt:
+    name: "{{ debian_packages }}"
+    state: present
+
+- name: Add apt key for MongoDB repository
+  apt_key:
+    url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+    state: present
+  register: _apt
+  until: _apt is succeeded
+  retries: 5
+
+- name: Ensure MongoDB apt repository exists
+  apt_repository:
+    repo: "deb https://repo.mongodb.org/apt/{{ ansible_facts.distribution|lower }} {{ ansible_facts.distribution_release }}/mongodb-org/{{ mongodb_version }} main"
+    state: present
+    filename: "mongodb-{{ mongodb_version }}"
+  register: _apt
+  until: _apt is succeeded
+  retries: 5
+
+- name: Install MongoDB Packages
+  package:
+    name:
+      - "mongodb-org"
+      - "mongodb-org-server"
+      - "mongodb-org-shell"
+      - "mongodb-org-mongos"
+      - "mongodb-org-tools"
+    state: present
+
+- name: Start mongod daemon
+  service:
+    name: "mongod"
+    state: started
+    enabled: yes

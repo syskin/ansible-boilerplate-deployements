@@ -1,0 +1,40 @@
+- name: Install ufw package
+  become: true
+  tags: firewall
+  apt:
+    name: ufw
+    state: latest
+
+- name: Allow incoming ports
+  become: true
+  tags: firewall
+  ufw:
+    rule: allow
+    port: '{{ item }}'
+    direction: in
+  with_items: '{{ allowed_in_ports }}'
+
+- name: Allow outgoing ports
+  become: true
+  tags: firewall
+  ufw:
+    rule: allow
+    port: '{{ item }}'
+    direction: out
+  with_items: '{{ allowed_out_ports }}'
+
+- name: Deny all incoming traffic
+  become: true
+  tags: firewall
+  ufw:
+    state: enabled
+    direction: incoming
+    policy: deny
+
+- name: Deny all outgoing traffic
+  become: true
+  tags: firewall
+  ufw:
+    state: enabled
+    direction: outgoing
+    policy: deny

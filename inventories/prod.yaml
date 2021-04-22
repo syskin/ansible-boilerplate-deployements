@@ -1,0 +1,10 @@
+all:
+  hosts:
+    vps-ssh:
+      ansible_host: xxx.xxx.xxx.xxx
+      ansible_port: 22
+      ansible_user: debian
+    vps-setup:
+      ansible_host: xxx.xxx.xxx.xxx
+      ansible_port: 7777
+      ansible_user: myUserName

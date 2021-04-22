@@ -1,0 +1,23 @@
+---
+- name: Create postgresql user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    name: "{{ postgresql_database_username }}"
+    password: "{{ postgresql_database_password }}"
+
+- name: Create postgresql database
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name: "{{ postgresql_database_name }}"
+    owner: "{{ postgresql_database_username }}"
+
+- name: Ensure the user have all access to the database
+  become: yes
+  become_user: postgres
+  postgresql_privs:
+    db: "{{ postgresql_database_name }}"
+    role: "{{ postgresql_database_username }}"
+    objs: ALL_IN_SCHEMA
+    privs: ALL

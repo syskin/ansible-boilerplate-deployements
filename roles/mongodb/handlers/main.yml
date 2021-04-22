@@ -1,0 +1,11 @@
+- name: restart mongodb-server
+  become: true
+  service:
+    name: mongod
+    state: restarted
+
+- name: reload mongodb-server
+  become: true
+  service:
+    name: mongod
+    state: reloaded

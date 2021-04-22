@@ -1,0 +1,34 @@
+---
+- name: Set the correct opcache filename.
+  become: true
+  set_fact:
+    php_opcache_conf_filename: "10-opcache.ini"
+
+- name: Add dependencies for PHP versions.
+  become: true
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+
+- name: Add Ondrej Sury's apt key.
+  become: true
+  apt_key:
+    url: "{{ php_key_repo }}"
+
+- name: Add Ondrej Sury's repo.
+  become: true
+  apt_repository:
+    repo: "{{ php_repo_url }}"
+  register: php_ondrej_debian_repo
+
+- name: Update apt caches after repo is added.
+  become: true
+  apt: update_cache=true
+  when:
+    - php_ondrej_debian_repo.changed
+
+- name: Install php{{ php_version }}
+  become: true
+  apt:
+    pkg: "{{ php_packages }}"

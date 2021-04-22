@@ -1,0 +1,3 @@
+---
+composer_installer_url : "https://getcomposer.org/installer"
+composer_installer_dest: "/tmp/ansible-composer-installer.php"

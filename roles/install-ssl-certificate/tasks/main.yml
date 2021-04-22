@@ -1,0 +1,6 @@
+---
+- name: Generate new certificate.
+  become: true
+  shell: "certbot certonly --standalone --noninteractive --agree-tos --email {{ certbot_admin_email }} -d {{ project_domain_name }}"
+  notify:
+    - reload nginx

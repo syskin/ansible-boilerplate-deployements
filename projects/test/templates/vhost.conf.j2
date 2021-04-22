@@ -1,0 +1,47 @@
+upstream {{item.server_name}} {
+    server 127.0.0.1:{{item.localhost_port}};
+    keepalive 8;
+}
+
+{% if item.listen != '80' %}
+
+server {
+    listen       80;
+    server_name  {{item.server_name}};
+    return       301 https://{{item.server_name}}$request_uri;
+}
+
+{% endif %}
+
+server {
+  listen {{ item.listen }};
+  server_name {{item.server_name}};
+  root {{item.root}};
+  access_log /var/log/nginx/{{item.server_name}}.log;
+
+  {% if item.listen != '80' %}
+
+  ssl_certificate     /etc/letsencrypt/live/{{item.server_name}}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{item.server_name}}/privkey.pem;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DH+3DES:!ADH:!AECDH:!MD5;
+
+  {% endif %}
+
+  location ~ /\.(?!well-known).*{
+    access_log off;
+    log_not_found off;
+    deny all;
+  }
+
+  # and much more can be added, see nginx config options
+  location / {
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_pass http://{{item.server_name}}/;
+
+    proxy_redirect off;
+  }
+}

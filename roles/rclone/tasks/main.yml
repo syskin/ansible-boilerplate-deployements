@@ -1,0 +1,56 @@
+#- name: Download rclone
+#  shell: 'curl https://rclone.org/install.sh | sudo bash'
+- name: Install required unzip package
+  package:
+    name: 'unzip'
+    state: present
+  become: true
+
+- block:
+    - name: Check latest stable rclone version number
+      uri:
+        url: https://downloads.rclone.org/version.txt
+        return_content: true
+      register:
+        rclone_latest_version
+      check_mode: false
+    - name: Set variable to latest stable version number
+      set_fact:
+        rclone_version: "{{ rclone_latest_version.content | replace ('rclone v', '', 1) | trim }}"
+  when: rclone_version is undefined
+
+- name: Create temporary working directory
+  file:
+    path: "{{ rclone_setup_tmp_dir }}"
+    state: directory
+    mode: '0775'
+
+- name: Get rclone stable version {{ rclone_version }}
+  unarchive:
+    src: https://downloads.rclone.org/v{{ rclone_version }}/rclone-v{{ rclone_version }}-linux-{{ rclone_arch }}.zip
+    dest: "{{ rclone_setup_tmp_dir }}"
+    remote_src: true
+    creates: "{{ rclone_setup_tmp_dir }}/rclone-v{{ rclone_version }}-linux-{{ rclone_arch }}"
+
+- name: Copy rclone binary
+  copy:
+    src: "{{ rclone_setup_tmp_dir }}/rclone-v{{ rclone_version }}-linux-{{ rclone_arch }}/rclone"
+    dest: "/usr/bin/rclone"
+    mode: '0755'
+    owner: root
+    group: root
+    remote_src: true
+  become: true
+
+- name: Create config directory
+  file:
+    path: '{{ rclone_config_location | dirname }}'
+    state: directory
+    mode: '0700'
+  when: rclone_configs is defined
+
+- name: Set up rclone config
+  template:
+    src: rclone.conf.j2
+    dest: '{{ rclone_config_location }}'
+  when: rclone_configs is defined

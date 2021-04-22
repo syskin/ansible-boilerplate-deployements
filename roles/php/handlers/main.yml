@@ -1,0 +1,12 @@
+---
+- name: check php-fpm config
+  become: true
+  command: php-fpm{{ php_version }} -t
+  any_errors_fatal: true
+  changed_when: false
+
+- name: reload php-fpm
+  become: true
+  service:
+    name: "php{{ php_version }}-fpm"
+    state: reloaded

@@ -1,0 +1,58 @@
+- hosts: vps-setup
+  vars:
+    allowed_in_ports: ['{{ansible_port | default(22, True)}}', 80, 443]
+    allowed_out_ports: [53, 80, 123, 443]
+    nginx_server_tokens: "off"
+    nginx_vhosts:
+      - listen: "80"
+        server_name: "test.com"
+        localhost_port: "3002"
+        root: "/home/{{ ansible_user }}/myApp"
+        filename: "test.com.conf"
+        template: "./templates/vhost.conf.j2"
+    mongodb_version: '4.2'
+    nodejs_version: '12.x'
+    nodejs_npm_global_packages: ['npm']
+  tasks:
+    - name: Setup certbot cron
+      cron:
+        name: "Certbot"
+        minute: "00"
+        hour: "3"
+        day: "1,15"
+        job: 'certbot renew --no-self-upgrade --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" > ./logs/certbot_cron.log 2>&1'
+        disabled: "no"
+      become: true
+      tags:
+       - cronjobs
+       - certbot
+    - name: restart cronjobs
+      become: true
+      service:
+        name: cron
+        state: restarted
+      tags:
+       - cronjobs
+  roles:
+    - role: geerlingguy.ntp
+      become: true
+      vars:
+        ntp_timezone: Europe/Paris
+      tags: ntp
+    - role: ./roles/ufw
+      become: true
+      tags: firewall
+    - role: ./roles/gnupg
+      become: true
+    - role: geerlingguy.nginx
+      become: true
+      tags: nginx
+    - role: ./roles/git
+      become: true
+      tags: git
+    - role: ./roles/mongodb
+      become: true
+      tags: mongodb
+    - role: ./roles/nodejs
+      become: true
+      tags: nodejs
