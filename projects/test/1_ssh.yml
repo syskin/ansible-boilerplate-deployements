@@ -3,9 +3,9 @@
     - role: ./roles/ssh-user
       become: true
       vars:
-        ssh_user: 'syskin'
-        ssh_user_password: '$6$UX.4UP8qF.nWuJ0$M343oYsUd.QZIZjfdPD6u/O.NRnEgk5xLvJzUJGJenyicAmZeH8bDy4ktumWsYEOg/QXxJ.BF7sxoL0Rc5Mbe/'
-        root_password: '$6$xFWN7g5.$JQO76Z2aabwRlZs3ALQwruog2sd34ZUVrtdl768juwxyny2GGkgx3k7adwNRuE4oXKqASVIMIyZbhHNsKvheb0'
+        ssh_user: 'ssh_user_name'
+        ssh_user_password: 'encrypted_password'
+        root_password: 'encrypted_root_password'
     - role: ./roles/ssh-setup
       become: true
       vars:
